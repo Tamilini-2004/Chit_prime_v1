@@ -1,0 +1,17 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": true,
+    "auctions": {
+      "$auctionId": {
+        ".read": true,
+        ".write": true,
+        "bids": {
+          ".read": true,
+          ".write": true,
+          ".indexOn": ["bidAmount", "bidTime"]
+        }
+      }
+    }
+  }
+}
