@@ -21,8 +21,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void dispose() { _phoneCtrl.dispose(); super.dispose(); }
 
   Future<void> _login() async {
+    final phone = _phoneCtrl.text.trim();
+    if (phone.length != 10) {
+      showSnack(context, 'Enter a valid 10-digit mobile number', isError: true);
+      return;
+    }
+
     setState(() => _loading = true);
-    final phone = _phoneCtrl.text.trim().isEmpty ? '9999999999' : _phoneCtrl.text.trim();
     final error = await ref.read(authNotifierProvider.notifier).signInMember(phone);
     if (!mounted) return;
     setState(() => _loading = false);
@@ -68,9 +73,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     decoration: const BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
     padding: const EdgeInsets.all(24),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Text('Login to CHITPRIME', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+      const Text('Continue with Mobile Number', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
       const SizedBox(height: 6),
-      const Text('Enter your mobile number to continue', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+      const Text('New users will complete name, email, Aadhaar and KYC upload on the next screen.', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
       const SizedBox(height: 28),
       TextFormField(
         controller: _phoneCtrl,
@@ -93,14 +98,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
       ),
       const SizedBox(height: 20),
-      GradientButton(label: 'Login', isLoading: _loading, onPressed: _login, icon: Icons.login_rounded),
-      const SizedBox(height: 12),
-      OutlinedButton.icon(
-        onPressed: _login,
-        icon: const Icon(Icons.flash_on_rounded, size: 18),
-        label: const Text('Quick Test Login'),
-        style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 48)),
-      ),
+      GradientButton(label: 'Continue', isLoading: _loading, onPressed: _login, icon: Icons.arrow_forward_rounded),
       const SizedBox(height: 16),
       Container(
         padding: const EdgeInsets.all(12),
@@ -108,7 +106,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         child: const Row(children: [
           Icon(Icons.info_outline_rounded, size: 16, color: AppColors.primary),
           SizedBox(width: 8),
-          Expanded(child: Text('Any phone number works in test mode. Auto-login enabled.', style: TextStyle(fontSize: 12, color: AppColors.primary))),
+          Expanded(child: Text('Phone login stays in test mode, but the number is now required before KYC can continue.', style: TextStyle(fontSize: 12, color: AppColors.primary))),
         ]),
       ),
       const Spacer(),

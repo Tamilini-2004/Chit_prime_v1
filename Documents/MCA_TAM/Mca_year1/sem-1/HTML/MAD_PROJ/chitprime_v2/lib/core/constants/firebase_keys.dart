@@ -6,6 +6,10 @@ class FirebaseKeys {
   static const contributions = 'contributions';
   static const auctions = 'auctions';
   static const payouts = 'payouts';
+  static const moneyRequests = 'money_requests';
+  static const polls = 'polls';
+  static const funds = 'funds';
+  static const repayments = 'repayments';
   static const notifications = 'notifications';
   static const messages = 'messages';
   static const fraudAlerts = 'fraud_alerts';

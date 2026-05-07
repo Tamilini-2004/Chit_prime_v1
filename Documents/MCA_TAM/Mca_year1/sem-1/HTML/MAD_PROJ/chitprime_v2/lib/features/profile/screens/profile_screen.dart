@@ -18,6 +18,14 @@ class ProfileScreen extends ConsumerWidget {
     final contribs = ref.watch(myContributionsProvider).valueOrNull ?? [];
     if (user == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
     final totalPaid = contribs.where((c) => c.status == 'success').fold(0.0, (s, c) => s + c.amount);
+    final kycLabel = user.kycStatus == 'verified'
+        ? 'VERIFIED'
+        : user.kycStatus == 'pending'
+            ? 'TO BE VERIFIED'
+            : user.kycStatus.toUpperCase();
+    final maskedAadhaar = user.aadhaarNumber.isNotEmpty
+        ? AppUtils.maskAadhaar(user.aadhaarNumber)
+        : (user.aadhaarLast4.isEmpty ? '' : 'XXXX XXXX ${user.aadhaarLast4}');
 
     return Scaffold(
       body: CustomScrollView(slivers: [
@@ -34,8 +42,10 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 10),
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Text(user.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white)),
-                  const SizedBox(width: 6),
-                  const Icon(Icons.verified_rounded, color: AppColors.accent, size: 18),
+                  if (user.kycStatus == 'verified') ...[
+                    const SizedBox(width: 6),
+                    const Icon(Icons.verified_rounded, color: AppColors.accent, size: 18),
+                  ],
                 ]),
                 Text('Member since ${AppUtils.formatDate(user.createdAt)}', style: const TextStyle(fontSize: 12, color: Colors.white70)),
               ])),
@@ -61,8 +71,10 @@ class ProfileScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               InfoRow(icon: Icons.phone_android_rounded, label: 'Phone', value: user.phone, verified: true),
               InfoRow(icon: Icons.email_outlined, label: 'Email', value: user.email.isEmpty ? 'Not provided' : user.email, verified: user.email.isNotEmpty),
+              if (maskedAadhaar.isNotEmpty)
+                InfoRow(icon: Icons.credit_card_rounded, label: 'Aadhaar', value: maskedAadhaar),
               InfoRow(icon: Icons.badge_rounded, label: 'Role', value: user.role.toUpperCase()),
-              InfoRow(icon: Icons.verified_user_rounded, label: 'KYC Status', value: user.kycStatus.toUpperCase(), verified: user.kycStatus == 'verified'),
+              InfoRow(icon: Icons.verified_user_rounded, label: 'KYC Status', value: kycLabel, verified: user.kycStatus == 'verified'),
             ])),
 
             // Bank Details

@@ -34,7 +34,7 @@ class GroupsNotifier extends AsyncNotifier<void> {
   @override
   Future<void> build() async {}
 
-  Future<String> createGroup({
+  Future<Map<String, String>> createGroup({
     required String name,
     required double contribution,
     required int members,
@@ -43,13 +43,18 @@ class GroupsNotifier extends AsyncNotifier<void> {
     String privacy = 'public',
   }) =>
       FirebaseService.createGroup(
-        name: name, contribution: contribution,
-        members: members, duration: duration,
-        fundType: fundType, privacy: privacy,
+        name: name,
+        contribution: contribution,
+        members: members,
+        duration: duration,
+        fundType: fundType,
+        privacy: privacy,
       );
 
-  Future<void> joinGroup(String groupId) =>
-      FirebaseService.joinGroup(groupId);
+  Future<void> joinGroup(String groupId) => FirebaseService.joinGroup(groupId);
+
+  Future<String> joinGroupByCode(String code) =>
+      FirebaseService.joinByCode(code);
 
   Future<void> removeMember(String groupId, String memberUid) =>
       FirebaseService.removeMember(groupId, memberUid);

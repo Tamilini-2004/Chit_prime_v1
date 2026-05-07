@@ -20,9 +20,8 @@ final allContributionsProvider = StreamProvider<List<ContributionModel>>(
     (ref) => FirebaseService.allContributionsStream());
 
 // Group payouts — real-time
-final groupPayoutsProvider =
-    StreamProvider.family<List<PayoutModel>, String>(
-        (ref, groupId) => FirebaseService.groupPayoutsStream(groupId));
+final groupPayoutsProvider = StreamProvider.family<List<PayoutModel>, String>(
+    (ref, groupId) => FirebaseService.groupPayoutsStream(groupId));
 
 // Single payout — real-time
 final payoutProvider = StreamProvider.family<PayoutModel?, String>(
@@ -43,8 +42,26 @@ class PaymentNotifier extends AsyncNotifier<void> {
     required String method,
   }) =>
       FirebaseService.makePayment(
-        groupId: groupId, groupName: groupName,
-        amount: amount, cycleNumber: cycleNumber, method: method,
+        groupId: groupId,
+        groupName: groupName,
+        amount: amount,
+        cycleNumber: cycleNumber,
+        method: method,
+      );
+
+  Future<Map<String, dynamic>> repay({
+    required String groupId,
+    required String groupName,
+    required double amount,
+    required String method,
+    required String remark,
+  }) =>
+      FirebaseService.repayment(
+        groupId: groupId,
+        groupName: groupName,
+        amount: amount,
+        method: method,
+        remark: remark,
       );
 
   Future<void> confirmPayout(String payoutId) =>

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/user_model.dart';
@@ -30,8 +32,12 @@ class AuthNotifier extends AsyncNotifier<void> {
 
   Future<String?> signInMember(String phone) async {
     try {
-      final email =
-          '${phone.replaceAll(RegExp(r'[^0-9]'), '')}@chitprime.test';
+      final normalizedPhone = phone.replaceAll(RegExp(r'[^0-9]'), '');
+      if (normalizedPhone.length != 10) {
+        return 'Enter a valid 10-digit mobile number';
+      }
+
+      final email = '$normalizedPhone@chitprime.test';
       try {
         await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: email, password: 'chitprime123');
@@ -44,8 +50,9 @@ class AuthNotifier extends AsyncNotifier<void> {
                   email: email, password: 'chitprime123');
           await FirebaseService.createOrUpdateUser(
             uid: cred.user!.uid,
-            phone: phone,
-            name: 'User ${phone.substring(phone.length > 4 ? phone.length - 4 : 0)}',
+            phone: normalizedPhone,
+            name:
+                'Member ${normalizedPhone.substring(normalizedPhone.length - 4)}',
             role: 'member',
           );
         } else {
@@ -55,7 +62,10 @@ class AuthNotifier extends AsyncNotifier<void> {
       // Ensure user doc exists
       final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
       await FirebaseService.createOrUpdateUser(
-          uid: uid, phone: phone, name: 'Member');
+        uid: uid,
+        phone: normalizedPhone,
+        name: 'Member ${normalizedPhone.substring(normalizedPhone.length - 4)}',
+      );
       return null;
     } catch (e) {
       return e.toString();
@@ -110,19 +120,38 @@ class AuthNotifier extends AsyncNotifier<void> {
     required String uid,
     required String name,
     String email = '',
+    String aadhaarNumber = '',
+    Uint8List? aadhaarImageBytes,
+    String aadhaarFileName = 'aadhaar.jpg',
     String bankName = '',
     String ifsc = '',
     String bankMasked = '',
   }) async {
-    await FirebaseService.updateUser(uid, {
+    final payload = <String, dynamic>{
       'name': name.isEmpty ? 'Test User' : name,
       'email': email,
       'bankName': bankName,
       'ifsc': ifsc,
       'bankMasked': bankMasked,
-      'kycStatus': 'verified',
       'accountStatus': 'active',
-    });
+    };
+
+    if (aadhaarNumber.isNotEmpty && aadhaarImageBytes != null) {
+      await FirebaseService.submitMemberKyc(
+        uid: uid,
+        name: name.isEmpty ? 'Test User' : name,
+        email: email,
+        aadhaarNumber: aadhaarNumber,
+        aadhaarImageBytes: aadhaarImageBytes,
+        aadhaarFileName: aadhaarFileName,
+      );
+      if (bankName.isNotEmpty || ifsc.isNotEmpty || bankMasked.isNotEmpty) {
+        await FirebaseService.updateUser(uid, payload);
+      }
+      return;
+    }
+
+    await FirebaseService.updateUser(uid, payload);
   }
 
   Future<void> logout() async {
